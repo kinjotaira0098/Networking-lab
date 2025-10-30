@@ -1,16 +1,35 @@
 === Device: Router (2911) ===
 version 15.1
 hostname Router
-no service timestamps log datetime msec
-no service timestamps debug datetime msec
-no service password-encryption
+
+! ----------- Basic Security & Management -----------
+enable secret <STRONG_ENABLE_PASSWORD>
+no ip domain-lookup
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+! SSH management (Packet Tracer 2911 supports RSA; 1024 is fine here)
+ip domain-name lab.local
+crypto key generate rsa modulus 1024
+username admin secret <STRONG_ADMIN_PASSWORD>
+!
+line con 0
+ exec-timeout 10 0
+ logging synchronous
+line aux 0
+ exec-timeout 10 0
+line vty 0 4
+ login local
+ transport input ssh
+ exec-timeout 10 0
 
 ! ---------------- DHCP ----------------
 ip dhcp excluded-address 192.168.10.1
 ip dhcp excluded-address 192.168.20.1
 ip dhcp excluded-address 192.168.30.1
 ip dhcp excluded-address 192.168.99.1
-
+!
 ip dhcp pool SALES
  network 192.168.10.0 255.255.255.0
  default-router 192.168.10.1
@@ -28,6 +47,7 @@ ip dhcp pool MGMT
  default-router 192.168.99.1
  dns-server 192.168.99.10
 
+! ------------- Global Routing / Defaults -------------
 ip cef
 no ipv6 cef
 ip classless
@@ -72,8 +92,7 @@ interface Vlan1
  no ip address
  shutdown
 
-! ------------- ACLs -------------
-! NOTE: Place specific permits BEFORE blanket denies (top-down processing).
+! ------------- ACLs (top-down) -------------
 ip access-list extended FILTER_SERVERS
  permit icmp any 192.168.99.0 0.0.0.255 echo
  permit tcp  any 192.168.99.0 0.0.0.255 eq www
@@ -82,13 +101,6 @@ ip access-list extended FILTER_SERVERS
  permit tcp  any host 192.168.99.10 eq domain
  deny   tcp  any 192.168.99.0 0.0.0.255 eq telnet
  deny   ip   any 192.168.99.0 0.0.0.255
-! implicit deny any (for everything else)
-
-! ------------- Lines (login/VTY) -------------
-line con 0
-line aux 0
-line vty 0 4
- login
+! implicit deny ip any any
 
 end
-
