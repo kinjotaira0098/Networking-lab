@@ -3,7 +3,7 @@ version 15.1
 hostname Router
 
 ! ----------- Basic Security & Management -----------
-enable secret <STRONG_ENABLE_PASSWORD>
+enable secret <REDACTED>
 no ip domain-lookup
 service timestamps debug datetime msec
 service timestamps log datetime msec
@@ -12,7 +12,7 @@ service password-encryption
 ! SSH management (Packet Tracer 2911 supports RSA; 1024 is fine here)
 ip domain-name lab.local
 crypto key generate rsa modulus 1024
-username admin secret <STRONG_ADMIN_PASSWORD>
+username admin secret <REDACTED>
 !
 line con 0
  exec-timeout 10 0
