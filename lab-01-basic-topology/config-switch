@@ -1,0 +1,77 @@
+=== Device: Switch (2960) ===
+version 15.0
+hostname SW-Core
+
+! ----------- VLAN Setup -----------
+vlan 10
+ name SALES
+vlan 20
+ name HR
+vlan 30
+ name IT
+vlan 99
+ name MGMT
+exit
+
+! ----------- Access Ports -----------
+interface range fa0/1 - 4
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+!
+interface range fa0/5 - 8
+ switchport mode access
+ switchport access vlan 20
+ spanning-tree portfast
+!
+interface range fa0/9 - 12
+ switchport mode access
+ switchport access vlan 30
+ spanning-tree portfast
+!
+interface range fa0/13 - 14
+ switchport mode access
+ switchport access vlan 99
+ spanning-tree portfast
+!
+
+! ----------- Trunk Link to Router -----------
+interface g0/1
+ description *** Trunk to Router G0/0 ***
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,99
+!
+! Optional: connect other switches
+! interface g0/2
+!  description *** Trunk to SW-Access ***
+!  switchport trunk encapsulation dot1q
+!  switchport mode trunk
+!  switchport trunk allowed vlan 10,20,30,99
+
+! ----------- Management VLAN (optional) -----------
+interface vlan 99
+ ip address 192.168.99.10 255.255.255.0
+ no shutdown
+exit
+
+! ----------- Basic Security -----------
+enable secret <STRONG_PASSWORD>
+no ip domain-lookup
+service password-encryption
+spanning-tree mode pvst
+spanning-tree portfast default
+banner motd ^C
+*** Unauthorized access prohibited ***
+^C
+
+! ----------- Console and VTY -----------
+line con 0
+ exec-timeout 10 0
+ logging synchronous
+line vty 0 4
+ login
+ transport input ssh
+ exec-timeout 10 0
+
+end
