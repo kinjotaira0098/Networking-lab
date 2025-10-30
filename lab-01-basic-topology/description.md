@@ -1,19 +1,11 @@
-# Lab 01: Basic Topology Setup
+# Lab 01: Inter-VLAN Routing + DHCP + ACL (RoAS)
 
-**Objective:**  
-Create a simple network using Cisco Packet Tracer. Connect two PCs and a router through a switch, assign IP addresses, and test connectivity with `ping`.
+**Goal:** Use a single router interface with 802.1Q subinterfaces to route between VLANs 10/20/30 and MGMT 99. Provide DHCP per VLAN and restrict access to the server VLAN (VLAN 99) with an inbound ACL.
 
-**Skills Practiced:**  
-- Designing basic topologies  
-- Configuring IP addresses  
-- Verifying connectivity  
-- Using basic Cisco CLI commands
+**Topology (conceptual):**
+PCs (VLAN 10/20/30) — Switch —(trunk)→ Router G0/0.{10,20,30,99}
 
-**Tools Used:**  
-- Cisco Packet Tracer  
-- Command Line (CMD or Linux Terminal)
-
-**Network Layout:**  
-- PC1 → Switch → Router ← Switch ← PC2  
-- IP Range: 192.168.10.0/24
-
+**Key Configs:**
+- G0/0 subifs: 10, 20, 30, 99 with gateway IPs
+- DHCP pools: SALES/HR/IT/MGMT
+- ACL `FILTER_SERVERS` applied inbound on G0/0.99
