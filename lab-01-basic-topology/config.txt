@@ -1,1 +1,94 @@
+=== Device: Router (2911) ===
+version 15.1
+hostname Router
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+
+! ---------------- DHCP ----------------
+ip dhcp excluded-address 192.168.10.1
+ip dhcp excluded-address 192.168.20.1
+ip dhcp excluded-address 192.168.30.1
+ip dhcp excluded-address 192.168.99.1
+
+ip dhcp pool SALES
+ network 192.168.10.0 255.255.255.0
+ default-router 192.168.10.1
+ dns-server 192.168.99.10
+ip dhcp pool HR
+ network 192.168.20.0 255.255.255.0
+ default-router 192.168.20.1
+ dns-server 192.168.99.10
+ip dhcp pool IT
+ network 192.168.30.0 255.255.255.0
+ default-router 192.168.30.1
+ dns-server 192.168.99.10
+ip dhcp pool MGMT
+ network 192.168.99.0 255.255.255.0
+ default-router 192.168.99.1
+ dns-server 192.168.99.10
+
+ip cef
+no ipv6 cef
+ip classless
+ip flow-export version 9
+
+! ------------- Interfaces (RoAS) -------------
+interface GigabitEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0.10
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.0
+!
+interface GigabitEthernet0/0.20
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.0
+!
+interface GigabitEthernet0/0.30
+ encapsulation dot1Q 30
+ ip address 192.168.30.1 255.255.255.0
+!
+interface GigabitEthernet0/0.99
+ encapsulation dot1Q 99
+ ip address 192.168.99.1 255.255.255.0
+ ip access-group FILTER_SERVERS in
+!
+interface GigabitEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface GigabitEthernet0/2
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+
+! ------------- ACLs -------------
+! NOTE: Place specific permits BEFORE blanket denies (top-down processing).
+ip access-list extended FILTER_SERVERS
+ permit icmp any 192.168.99.0 0.0.0.255 echo
+ permit tcp  any 192.168.99.0 0.0.0.255 eq www
+ permit tcp  any 192.168.99.0 0.0.0.255 eq 443
+ permit udp  any host 192.168.99.10 eq domain
+ permit tcp  any host 192.168.99.10 eq domain
+ deny   tcp  any 192.168.99.0 0.0.0.255 eq telnet
+ deny   ip   any 192.168.99.0 0.0.0.255
+! implicit deny any (for everything else)
+
+! ------------- Lines (login/VTY) -------------
+line con 0
+line aux 0
+line vty 0 4
+ login
+
+end
 
